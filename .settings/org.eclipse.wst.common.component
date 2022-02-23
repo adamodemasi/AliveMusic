@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="AliveMusic">
+        <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/test"/>
+        <dependent-module archiveName="org.restlet.lib.org.json2.0.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/AliveMusic/libs/org.restlet.lib.org.json2.0.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="imap.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/AliveMusic/libs/imap.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="mailapi.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/AliveMusic/libs/mailapi.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="gimap.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/AliveMusic/libs/gimap.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="dsn.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/AliveMusic/libs/dsn.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="javax.mail.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/AliveMusic/libs/javax.mail.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pop3.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/AliveMusic/libs/pop3.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="smtp.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/AliveMusic/libs/smtp.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <property name="context-root" value="AliveMusic"/>
+        <property name="java-output-path" value="/AliveMusic/build/classes"/>
+    </wb-module>
+</project-modules>

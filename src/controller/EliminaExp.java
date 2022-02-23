@@ -1,0 +1,149 @@
+package controller;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import email.Facade;
+import entita.Experience;
+import entita.Utente;
+import persistenza.DatabaseManager;
+import persistenza.dao.ExperienceDao;
+import persistenza.dao.UtenteDao;
+
+/**
+ * Servlet implementation class EliminaExp
+ */
+@WebServlet("/EliminaExp")
+public class EliminaExp extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public EliminaExp() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	{
+		
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	{
+		StringBuffer jsonReceived = new StringBuffer();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream()));		
+		String line = reader.readLine();
+		while (line != null)
+		{
+			jsonReceived.append(line);
+			line = reader.readLine();
+		}
+
+		try {
+			JSONArray jsonArray = new JSONArray(jsonReceived.toString());
+			
+			JSONObject jsonExp = jsonArray.getJSONObject(0);
+			JSONObject jsonOrganizzatore = jsonArray.getJSONObject(1);
+			
+			Experience e = new Experience();
+			e.setID(jsonExp.getInt("ID"));
+			e.setPosti(jsonExp.getInt("posti"));
+			e.setDescrizione(jsonExp.getString("descrizione"));
+			
+			String dataString = jsonExp.getString("limite_adesione");
+			DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy",Locale.ROOT);
+			Date date = null;
+			try {
+				date = format.parse(dataString);
+			} catch (ParseException e1) {
+				e1.printStackTrace();
+			}
+			e.setLimite_adesione(date);
+
+			List<String> nicknamePartecipanti = new LinkedList<>();
+			List<String> emailPartecipanti = new LinkedList<>();
+			String nickOrganizzatore = jsonOrganizzatore.getString("organizzatore");
+			
+			
+			ExperienceDao experienceDao = DatabaseManager.getInstance().getDaoFactory().getExperienceDAO();
+			
+			
+			experienceDao.deleteAllPartecipazioneFromExp(e);
+
+			
+			JSONArray jsonArrayPartecipanti = jsonExp.getJSONArray("partecipanti");
+			for(int i=0;i<jsonArrayPartecipanti.length();i++)
+			{
+				JSONObject o = jsonArrayPartecipanti.getJSONObject(i);	
+				nicknamePartecipanti.add(o.getString("nickname"));
+				emailPartecipanti.add(o.getString("mail"));
+			}
+
+			UtenteDao utenteDao = DatabaseManager.getInstance().getDaoFactory().getUtenteDAO();
+
+
+			Utente organizzatore = utenteDao.findByPrimaryKey(jsonOrganizzatore.getString("organizzatore"));
+			String mailOrg = organizzatore.getMail();
+
+				Facade.sendMessage(mailOrg,"Conferma eliminazione della tua experience con ID: " + e.getID(),"Ti confermiamo l'eliminazione della tua experience. \\n \\n \\n \\n Il team di MusicExp.");
+				System.out.println("ORGANIZZATORE "+mailOrg);
+
+			
+				
+			//INVIO MAIL ALTRI PARTECIPANTI
+
+							for(int i=0;i<emailPartecipanti.size();i++)
+							{
+								Facade.sendMessage(emailPartecipanti.get(i), "RIMOZIONE UTENTE EXPERIENCE A CUI PARTECIPI", "Stai attento: l'experience a cui partecipi, con ID " + e.getID() + "e' stata eliminata. \\n \\n \\n \\n Il team di MusicExp.");
+								System.out.println("PARTECIPANTE "+i+" "+emailPartecipanti.get(i));
+									
+								
+								if(emailPartecipanti.get(i)==null)
+									System.out.println("ERRORREREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+							
+							}
+
+			if(mailOrg==null)
+				System.out.println("ERROEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+			//torna evento id per poter richiamare la servlet quand si trova in eventi.jsp
+			
+			
+			experienceDao.delete(e);
+
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+}
